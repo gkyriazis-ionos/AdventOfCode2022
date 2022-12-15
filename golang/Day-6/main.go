@@ -1,48 +1,69 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"strings"
 )
 
-const filename = "./example-input.txt"
+const filename = "./input.txt"
 
-func getContent(location string) (os.File, error) {
-	content, err := os.Open(location)
+func getContent(location string) (string, error) {
+	content, err := os.ReadFile(location)
 	if err != nil {
-		return os.File{}, err
+		return "", err
 	}
-	return *content, nil
+	return string(content), nil
 }
 
-func readInput(input bufio.Scanner) [][]string {
-	var patchOfBoxes [][]string
-	rowCount := 0
-	for input.Scan() {
-		lineScanner := bufio.NewScanner(strings.NewReader(input.Text()))
-		lineScanner.Split(bufio.ScanWords)
-		for lineScanner.Scan() {
-			if len(patchOfBoxes) <= rowCount {
-				patchOfBoxes = append(patchOfBoxes, []string{})
-			}
-			var height string
-			if _, err := fmt.Sscan(lineScanner.Text(), &height); err != nil {
-				log.Fatal(err)
-			}
-			if strings.Join(patchOfBoxes[rowCount], "") == " " {
+func parseInputAndFindNumOfChars(content string) {
+	lines := strings.Split(content, "\n")
+	for _, line := range lines {
+		charsArray := strings.Split(line, "")
+		fmt.Println(charsArray)
+		for i := 0; i < len(charsArray); i++ {
+			if charsArray[i] != charsArray[i+1] && charsArray[i] != charsArray[i+2] && charsArray[i] != charsArray[i+3] &&
+				charsArray[i+1] != charsArray[i+2] && charsArray[i+1] != charsArray[i+3] && charsArray[i+2] != charsArray[i+3] {
+				fmt.Println(i + 3 + 1)
 				break
 			}
-			patchOfBoxes[rowCount] = append(patchOfBoxes[rowCount], height)
-			fmt.Println(patchOfBoxes[rowCount])
-
 		}
-		rowCount += 1
-	}
-	return patchOfBoxes
 
+	}
+}
+
+func unique(arr string) bool {
+	m := make(map[rune]bool)
+	for _, i := range arr {
+		_, ok := m[i]
+		if ok {
+			return false
+		}
+
+		m[i] = true
+	}
+
+	return true
+}
+
+func parseInputAndFindNumOfMsg(content string) {
+	lines := strings.Split(content, "\n")
+	for _, line := range lines {
+		charsArray := strings.Split(line, "")
+		var found []string
+		for i := 0; i < len(charsArray); i++ {
+			found = append(found, charsArray[i])
+			//fmt.Println(found)
+			if i > 14 {
+				s := strings.Join(found[i-14:i], "")
+				if unique(s) {
+					fmt.Println(i)
+					break
+				}
+			}
+		}
+	}
 }
 
 func main() {
@@ -51,7 +72,7 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 	//fmt.Println(content)
-	scanner := bufio.NewScanner(&content)
-	boxes := readInput(*scanner)
-	fmt.Println(boxes)
+	//parseInputAndFindNumOfChars(content)
+	parseInputAndFindNumOfMsg(content)
+
 }

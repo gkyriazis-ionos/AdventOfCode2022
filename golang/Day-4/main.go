@@ -4,69 +4,57 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 	"strings"
 )
 
 const filename = "./input.txt"
 
-func findPrio() map[string]int {
-	prio := map[string]int{}
-	alphabet := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
-	chars := strings.Split(alphabet, "")
-	for i, c := range chars {
-		prio[c] = i + 1
-	}
-	return prio
-
-}
-
-func findBadgePrio(content string) int {
+func findTasksThatOverlapFully(content string) int {
 	lines := strings.Split(content, "\n")
-
-	var found []string
-	for i := 0; i < len(lines); i += 3 {
-		elf1 := lines[i]
-		elf2 := lines[i+1]
-		elf3 := lines[i+2]
-		for _, c := range elf1 {
-			if strings.Contains(elf2, string(c)) && strings.Contains(elf3, string(c)) {
-				found = append(found, string(c))
-				break
-			}
-		}
-	}
-	//fmt.Println(found)
-	prio := findPrio()
-	sum := 0
-	for _, c := range found {
-		sum += prio[c]
-	}
-
-	return sum
-}
-
-func findItemsPrio(content string) int {
-	lines := strings.Split(content, "\n")
-
-	var found []string
+	count := 0
 	for _, line := range lines {
-		chars := strings.Split(line, "")
-		bag1 := chars[0 : len(chars)/2]
-		bag2 := chars[len(chars)/2:]
-		for _, item := range bag1 {
-			if strings.Contains(strings.Join(bag2, ""), item) {
-				found = append(found, item)
-				break
+		line := strings.Split(line, ",")
+		fmt.Println(line)
+		line1 := strings.Split(line[0], "-")
+		line2 := strings.Split(line[1], "-")
+
+		startA, _ := strconv.Atoi(line1[0])
+		endA, _ := strconv.Atoi(line1[1])
+		startB, _ := strconv.Atoi(line2[0])
+		endB, _ := strconv.Atoi(line2[1])
+		if (startB >= startA && endB <= endA) || (startA >= startB && endA <= endB) {
+			count += 1
+		}
+
+	}
+	return count
+}
+
+func findTasksThatOverlapAtAll(content string) int {
+	lines := strings.Split(content, "\n")
+	count := 0
+	for _, line := range lines {
+		line := strings.Split(line, ",")
+		line1 := strings.Split(line[0], "-")
+		line2 := strings.Split(line[1], "-")
+
+		startA, _ := strconv.Atoi(line1[0])
+		endA, _ := strconv.Atoi(line1[1])
+		startB, _ := strconv.Atoi(line2[0])
+		endB, _ := strconv.Atoi(line2[1])
+
+	loop:
+		for i := startA; i <= endA; i++ {
+			for j := startB; j <= endB; j++ {
+				if i == j {
+					count++
+					break loop
+				}
 			}
 		}
 	}
-	prio := findPrio()
-	sum := 0
-	for _, c := range found {
-		sum += prio[c]
-	}
-
-	return sum
+	return count
 }
 
 func getContent(location string) (string, error) {
@@ -82,6 +70,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-	fmt.Println(findItemsPrio(content))
-	fmt.Println(findBadgePrio(content))
+	fmt.Println(findTasksThatOverlapFully(content))
+	fmt.Println(findTasksThatOverlapAtAll(content))
+
 }

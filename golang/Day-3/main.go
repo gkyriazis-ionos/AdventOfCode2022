@@ -9,96 +9,64 @@ import (
 
 const filename = "./input.txt"
 
-func calcScore(c string) int {
-	content, err := getContent(filename)
-	if err != nil {
-		log.Fatalf("%v", err)
+func findPrio() map[string]int {
+	prio := map[string]int{}
+	alphabet := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	chars := strings.Split(alphabet, "")
+	for i, c := range chars {
+		prio[c] = i + 1
 	}
-	score := 0
-	lines := strings.Split(content, "\n")
+	return prio
 
-	for _, line := range lines {
-
-		a, b, _ := strings.Cut(line, " ")
-		switch a {
-		case "A":
-			switch b {
-			case "X":
-				score += 3 + 1
-			case "Y":
-				score += 6 + 2
-			case "Z":
-				score += 0 + 3
-			}
-		case "B":
-			switch b {
-			case "X":
-				score += 0 + 1
-			case "Y":
-				score += 3 + 2
-			case "Z":
-				score += 6 + 3
-			}
-		case "C":
-			switch b {
-			case "X":
-				score += 6 + 1
-			case "Y":
-				score += 0 + 2
-			case "Z":
-				score += 3 + 3
-			}
-
-		}
-
-	}
-	return score
 }
 
-func calcScorePart2(c string) int {
-	content, err := getContent(filename)
-	if err != nil {
-		log.Fatalf("%v", err)
-	}
-	score := 0
+func findBadgePrio(content string) int {
 	lines := strings.Split(content, "\n")
 
-	for _, line := range lines {
-
-		a, b, _ := strings.Cut(line, " ")
-		switch a {
-		case "A":
-			switch b {
-			case "X":
-				score += 0 + 3
-			case "Y":
-				score += 3 + 1
-			case "Z":
-				score += 6 + 2
+	var found []string
+	for i := 0; i < len(lines); i += 3 {
+		elf1 := lines[i]
+		elf2 := lines[i+1]
+		elf3 := lines[i+2]
+		for _, c := range elf1 {
+			if strings.Contains(elf2, string(c)) && strings.Contains(elf3, string(c)) {
+				found = append(found, string(c))
+				break
 			}
-		case "B":
-			switch b {
-			case "X":
-				score += 0 + 1
-			case "Y":
-				score += 3 + 2
-			case "Z":
-				score += 6 + 3
-			}
-		case "C":
-			switch b {
-			case "X":
-				score += 0 + 2
-			case "Y":
-				score += 3 + 3
-			case "Z":
-				score += 6 + 1
-			}
-
 		}
-
 	}
-	return score
+	//fmt.Println(found)
+	prio := findPrio()
+	sum := 0
+	for _, c := range found {
+		sum += prio[c]
+	}
+
+	return sum
+}
+
+func findItemsPrio(content string) int {
+	lines := strings.Split(content, "\n")
+
+	var found []string
+	for _, line := range lines {
+		chars := strings.Split(line, "")
+		bag1 := chars[0 : len(chars)/2]
+		bag2 := chars[len(chars)/2:]
+		for _, item := range bag1 {
+			if strings.Contains(strings.Join(bag2, ""), item) {
+				found = append(found, item)
+				break
+			}
+		}
+	}
+	prio := findPrio()
+	sum := 0
+	for _, c := range found {
+		sum += prio[c]
+	}
+
+	return sum
 }
 
 func getContent(location string) (string, error) {
@@ -114,10 +82,6 @@ func main() {
 	if err != nil {
 		log.Fatalf("%v", err)
 	}
-
-	score := calcScore(content)
-	fmt.Printf("Score PT 1: %d\n", score)
-
-	score = calcScorePart2(content)
-	fmt.Printf("Score PT 2: %d\n", score)
+	fmt.Println(findItemsPrio(content))
+	fmt.Println(findBadgePrio(content))
 }
